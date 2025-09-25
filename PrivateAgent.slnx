@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Agent/Agent.csproj" />
+  <Project Path="PrivateAgent.AppHost/PrivateAgent.AppHost.csproj" />
+  <Project Path="PrivateAgent.ServiceDefaults/PrivateAgent.ServiceDefaults.csproj" />
+</Solution>
