@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /PrivateAgent.AppHost/.env
+/McpServer/credentials.json
+/McpServer/MyGmailTokens/Google.Apis.Auth.OAuth2.Responses.TokenResponse-default

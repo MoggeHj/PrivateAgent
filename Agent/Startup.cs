@@ -9,7 +9,6 @@ namespace Agent;
 
 public static class Startup
 {
-       
     public static async Task ConfigureServices(IServiceCollection services)
     {
         var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")!;
@@ -17,6 +16,7 @@ public static class Startup
         var claudeKey = Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!;
         var provider = Environment.GetEnvironmentVariable("PROVIDER");
         var model = Environment.GetEnvironmentVariable("MODEL");
+        var mcpServerUrl = Environment.GetEnvironmentVariable("MCP_SERVER_URL") ?? "http://localhost:5050"; // default to local MCP server
 
         services.AddLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Information));
         services.AddSingleton<ILoggerFactory>(sp =>
@@ -47,34 +47,28 @@ public static class Startup
                 .Build(sp);
         });
 
-
+        // Connect to existing MCP server over HTTP instead of spawning a stdio process
         var mcpClient = await McpClientFactory.CreateAsync(
-            new StdioClientTransport(new()
+            new HttpClientTransport(new HttpClientTransportOptions
             {
-                Command = "npx",
-                Arguments = ["-y", "--verbose", "@modelcontextprotocol/server-everything"],
-                Name = "Everything",
+                Endpoint = new Uri(mcpServerUrl)
             })
         );
 
-        // List available tools
+        // List available tools from remote MCP server
         var tools = await mcpClient.ListToolsAsync();
         foreach (var tool in tools)
         {
             Console.WriteLine($"{tool.Name}: {tool.Description}");
         }
 
-
-
         services.AddTransient<ChatOptions>(sp => new ChatOptions
         {
-            Tools = [..tools], //[.. FunctionRegistry.GetTools(sp)],
+            Tools = [..tools],
             ModelId = model,
             Temperature = 1,
             MaxOutputTokens = 5000
         });
-
-
     }
 }
 
