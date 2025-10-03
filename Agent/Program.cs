@@ -1,6 +1,5 @@
 using Agent;
 using Microsoft.Extensions.AI;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,15 +10,21 @@ builder.Services.AddOpenApi();
 
 await Startup.ConfigureServices(builder.Services);
 
-var systemPrompt = "You are an helpful agent that can look up things in my email account and keep a good polite conversation";
+var systemPrompt = "You are a helpful agent that can look up things in my email account and keep a good polite conversation";
 
 var app = builder.Build();
 
 app.MapPost("/chat", async (
     List<ChatMessage> messages,
     IChatClient client,
-    ChatOptions chatOptions) =>
+    ChatOptions? chatOptions) =>
 {
+    if (messages is null || messages.Count == 0)
+    {
+        return Results.BadRequest("Messages collection cannot be empty.");
+    }
+
+    //Add date and incoming message to system prompt
     var systemPromptWithDate = systemPrompt + "\nBy the way today's date is " + DateTime.Now.ToLongDateString();
 
     var withSystemPrompt = new List<ChatMessage>(messages.Count + 1)
@@ -28,24 +33,21 @@ app.MapPost("/chat", async (
     };
     withSystemPrompt.AddRange(messages);
 
+    // Call the chat model
     var response = await client.GetResponseAsync(withSystemPrompt, chatOptions);
 
     
-
-    var messagesResult = new List<SimpleMessage>();
+    //Create 
+    var chatResponse = new List<SimpleMessage>(response.Messages.Count);
 
     foreach (var responseMessage in response.Messages)
     {
-        messagesResult.Add(new SimpleMessage(
-        
-            Role = responseMessage.Role
-                .ToString()
-                .ToLowerInvariant(),
-            Text = responseMessage.Text
-        ));
+        chatResponse.Add(new SimpleMessage(
+            responseMessage.Role.ToString().ToLowerInvariant(),
+            responseMessage.Text));
     }
 
-    return Results.Ok(messagesResult);
+    return Results.Ok(chatResponse);
 });
 
 app.MapDefaultEndpoints();
@@ -61,5 +63,3 @@ app.MapControllers();
 app.Run();
 
 public record SimpleMessage(string Role, string Text);
-
-public record Messages (List<SimpleMessage> Items);

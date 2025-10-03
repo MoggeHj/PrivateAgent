@@ -1,0 +1,118 @@
+@page "/chat"
+@rendermode InteractiveServer
+@using Microsoft.Extensions.AI
+
+<PageTitle>Chat</PageTitle>
+
+<h1>Chat</h1>
+
+<div class="chat-container">
+    <div class="messages" @ref="_messagesDiv">
+        @foreach (var m in _messages)
+        {
+            <div class="message @(m.Role.ToString().ToLowerInvariant())">
+                <strong>@m.Role:</strong> @DisplayText(m)
+            </div>
+        }
+    </div>
+    <EditForm Model="_form" OnValidSubmit="SendAsync">
+        <InputText @bind-Value="_form.Text" class="form-control" placeholder="Type a message..." />
+        <button type="submit" class="btn btn-primary mt-2" disabled="@_sending">Send</button>
+    </EditForm>
+    @if (_error != null)
+    {
+        <div class="text-danger mt-2">@_error</div>
+    }
+</div>
+
+@code {
+    private readonly List<ChatMessage> _messages = new();
+    private readonly MessageForm _form = new();
+    private bool _sending;
+    private string? _error;
+    private ElementReference _messagesDiv;
+
+    private string DisplayText(ChatMessage m) => m.Text ?? string.Empty;
+
+    private async Task SendAsync()
+    {
+        if (_sending) return;
+        var userText = _form.Text?.Trim();
+        if (string.IsNullOrEmpty(userText)) return;
+
+        _messages.Add(new ChatMessage(ChatRole.User, userText));
+        _form.Text = string.Empty;
+        _sending = true;
+        _error = null;
+        StateHasChanged();
+        try
+        {
+            using var client = new HttpClient { BaseAddress = new Uri("https://localhost:7291") };
+            var resp = await client.PostAsJsonAsync("/chat", _messages);
+            if (resp.IsSuccessStatusCode)
+            {
+                var newMessages = await resp.Content.ReadFromJsonAsync<List<SimpleMessage>>();
+                if (newMessages != null)
+                {
+                    foreach (var sm in newMessages)
+                    {
+                        var role = ParseRole(sm.Role);
+                        _messages.Add(new ChatMessage(role, sm.Text));
+                    }
+                }
+                else
+                {
+                    _error = "Empty response";
+                }
+            }
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                _error = $"Error: {resp.StatusCode} {body}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _sending = false;
+            StateHasChanged();
+            await ScrollToBottomAsync();
+        }
+    }
+
+    private static ChatRole ParseRole(string role) => role.ToLowerInvariant() switch
+    {
+        "system" => ChatRole.System,
+        "assistant" => ChatRole.Assistant,
+		"user" => ChatRole.User,
+		"tool"  => ChatRole.Tool,
+		_ => ChatRole.User
+        
+    };
+
+    private async Task ScrollToBottomAsync()
+    {
+        try
+        {
+            await Task.Delay(50);
+            await JS.InvokeVoidAsync("eval", "var el=document.querySelector('.messages'); if(el) el.scrollTop=el.scrollHeight;");
+        }
+        catch { }
+    }
+
+    private record MessageForm { public string? Text { get; set; } }
+    private record SimpleMessage(string Role, string Text);
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+}
+
+<style>
+.chat-container { max-width: 800px; }
+.messages { border: 1px solid #ccc; padding: .75rem; height: 400px; overflow-y: auto; background: #fafafa; }
+.message { margin-bottom: .5rem; }
+.message.user { color: #0d6efd; }
+.message.assistant { color: #198754; }
+</style>

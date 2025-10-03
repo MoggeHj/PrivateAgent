@@ -23,13 +23,6 @@ namespace McpServer
             return result.ToList();
         }
 
-        //[McpServerTool, Description("Get the message for the messageId property in the data type Message")]
-        //public async Task<Message> GetMessageAsync(string messageId)
-        //{
-        //    var message = await _gmailService.GetMessageAsync(messageId);
-        //    return message;
-        //}
-
         [McpServerTool, Description("Get the mail plain text and date the mail was sent for a mail which is queried by messageId property")]
         public async Task<MessageTextAndDetails> GetMessageContentAsync(string messageId)
         {
