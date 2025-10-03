@@ -13,12 +13,17 @@ var mcpServerUrl = builder.AddParameter("McpServerUrl", secret: false);
 
 var mcpServer = builder.AddProject<Projects.McpServer>("mcpserver");
 
-builder.AddProject<Projects.Agent>("agent")
+var agent = builder.AddProject<Projects.Agent>("agent")
     .WithEnvironment("PROVIDER", provider)
     .WithEnvironment("MODEL", model)
     .WithEnvironment("OPENAI_API_KEY", openAiKey)
     .WithEnvironment("MCP_SERVER_URL", mcpServerUrl)
     .WaitFor(mcpServer);
+
+
+
+builder.AddProject<Projects.ChatClient>("chatclient")
+    .WaitFor(agent);
 
 
 

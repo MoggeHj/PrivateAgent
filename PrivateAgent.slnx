@@ -3,6 +3,7 @@
     <File Path="PrivateAgent.AppHost/.env" />
   </Folder>
   <Project Path="Agent/Agent.csproj" />
+  <Project Path="ChatClient/ChatClient.csproj" />
   <Project Path="McpServer/McpServer.csproj" />
   <Project Path="PrivateAgent.AppHost/PrivateAgent.AppHost.csproj" />
   <Project Path="PrivateAgent.ServiceDefaults/PrivateAgent.ServiceDefaults.csproj" />
