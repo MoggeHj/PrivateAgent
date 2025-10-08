@@ -25,7 +25,7 @@ app.MapPost("/chat", async (
     }
 
     //Add date and incoming message to system prompt
-    var systemPromptWithDate = systemPrompt + "\nBy the way today's date is " + DateTime.Now.ToLongDateString();
+    var systemPromptWithDate = systemPrompt + "\nBy the way today's date is " + DateTime.Now.ToLongDateString() + "\nRemember that we live in Norway and speak norwegian";
 
     var withSystemPrompt = new List<ChatMessage>(messages.Count + 1)
     {

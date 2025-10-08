@@ -27,4 +27,11 @@ builder.AddProject<Projects.ChatClient>("chatclient")
 
 
 
+builder.AddProject<Projects.Agent_Semantic_Kernel>("agent-semantic-kernel")
+    .WithEnvironment("OPENAI_API_KEY", openAiKey)
+    .WithEnvironment("MODEL", model)
+    .WaitFor(mcpServer);
+
+
+
 builder.Build().Run();

@@ -47,7 +47,7 @@
         StateHasChanged();
         try
         {
-            using var client = new HttpClient { BaseAddress = new Uri("https://localhost:7291") };
+            using var client = new HttpClient { BaseAddress = new Uri("https://localhost:7055") };
             var resp = await client.PostAsJsonAsync("/chat", _messages);
             if (resp.IsSuccessStatusCode)
             {

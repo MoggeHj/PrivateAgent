@@ -60,7 +60,7 @@ public sealed class GmailService : IGmailService, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task<IList<Message>> SearchMessagesAsync(string? query, int? maxResults = null, CancellationToken ct = default)
+    public async Task<IList<Message>> SearchMessagesAsync(string query, int? maxResults = null, CancellationToken ct = default)
     {
         ThrowIfDisposed();
 
@@ -264,7 +264,7 @@ public sealed class GmailService : IGmailService, IDisposable
 
 public interface IGmailService
 {
-    Task<IList<Message>> SearchMessagesAsync(string? query, int? maxResults = null, CancellationToken ct = default);
+    Task<IList<Message>> SearchMessagesAsync(string query, int? maxResults = null, CancellationToken ct = default);
     Task<Message> GetMessageAsync(string messageId, string format = "full", CancellationToken ct = default);
     Task<MessageTextAndDetails> GetMessageTextAsync(string messageId, CancellationToken ct = default);
     Task<MessageTextAndDetailsWithAttachments> GetMessageTextAndAttachmentsAsync(string messageId, CancellationToken ct = default);

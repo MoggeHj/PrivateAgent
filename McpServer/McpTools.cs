@@ -15,9 +15,10 @@ namespace McpServer
             _gmailService = gmailService;
         }
 
-        [McpServerTool, Description("Search for messages that matches the query parameter and returns maximum results correspoinding to MaxResults parameter. Returns ID (messageId) and ThreadId. MessageId can be used to fetch complete message using some of the other endpoints.")]
-        public async Task<List<Message>> SearchMessagesAsync(string? query, int? maxResults = null)
+        [McpServerTool, Description("Search for mails that matches the query parameter.")]
+        public async Task<List<Message>> SearchMessagesAsync([Description("searches the mail inbox after this query paramter")]string query)
         {
+            var maxResults = 2;
             var result = await _gmailService.SearchMessagesAsync(query, maxResults);
 
             return result.ToList();
@@ -40,7 +41,7 @@ namespace McpServer
 
     public interface IMcpTools
     {
-        Task<List<Message>> SearchMessagesAsync(string? query, int? maxResults = null);
+        Task<List<Message>> SearchMessagesAsync(string query);
 
         Task<MessageTextAndDetails> GetMessageContentAsync(string messageId);
 

@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Agent.Semantic.Kernel\Agent.Semantic.Kernel.csproj" />
     <ProjectReference Include="..\Agent\Agent.csproj" />
     <ProjectReference Include="..\ChatClient\ChatClient.csproj" />
     <ProjectReference Include="..\McpServer\McpServer.csproj" />
